@@ -1,3 +1,54 @@
+<?php //error_reporting(0);
+include('includes/config.php'); 
+
+if(isset($_POST['book']))
+{
+$ptype=$_POST['packagetype'];
+$wpoint=$_POST['washingpoint'];   
+$fname=$_POST['fname'];
+$mobile=$_POST['contactno'];
+$slotId=$_POST['slot'];
+$sql = "SELECT * from slots where id = $slotId";
+$query = $dbh -> prepare($sql);
+$query->execute();
+$slot=$query->fetch(PDO::FETCH_OBJ);
+$date =$slot->slotDate;
+$time =$slot->slotTime;
+$message=$_POST['message'];
+$status='New';
+
+$sql = "UPDATE slots SET availability=0 where id = $slotId";
+$query = $dbh -> prepare($sql);
+$query->execute();
+
+$bno=mt_rand(100000000, 999999999);
+$sql="INSERT INTO tblcarwashbooking(bookingId,packageType,carWashPoint,fullName,mobileNumber,washDate,washTime,message,status) VALUES(:bno,:ptype,:wpoint,:fname,:mobile,:date,:time,:message,:status)";
+$query = $dbh->prepare($sql);
+$query->bindParam(':bno',$bno,PDO::PARAM_STR);
+$query->bindParam(':ptype',$ptype,PDO::PARAM_STR);
+$query->bindParam(':wpoint',$wpoint,PDO::PARAM_STR);
+$query->bindParam(':fname',$fname,PDO::PARAM_STR);
+$query->bindParam(':mobile',$mobile,PDO::PARAM_STR);
+$query->bindParam(':date',$date,PDO::PARAM_STR);
+$query->bindParam(':time',$time,PDO::PARAM_STR);
+$query->bindParam(':message',$message,PDO::PARAM_STR);
+$query->bindParam(':status',$status,PDO::PARAM_STR);
+$query->execute();
+$lastInsertId = $dbh->lastInsertId();
+if($lastInsertId)
+{
+ 
+  echo '<script>alert("Your booking done successfully. Booking number is "+"'.$bno.'")</script>';
+ echo "<script>window.location.href ='washing-plans.php'</script>";
+}
+else 
+{
+ echo "<script>alert('Something went wrong. Please try again.');</script>";
+}
+
+}
+
+?>
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -28,36 +79,8 @@
 
     <body>
         
-        
-                <!-- Nav Bar Start -->
-                <div class="nav-bar">
-                    <div class="container">
-                        <nav class="navbar navbar-expand-lg bg-dark navbar-dark">
-                            <a href="#" class="navbar-brand">MENU</a>
-                            <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
-                                <span class="navbar-toggler-icon"></span>
-                            </button>
-        
-                            <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
-                                <div class="navbar-nav mr-auto">
-                                    <a href="index.html" class="nav-item nav-link active">Home</a>
-                                    <a href="about.html" class="nav-item nav-link">About</a>
-                                    <a href="washing-plans.html" class="nav-item nav-link">Washing Plans</a>
-                                    <a href="washing-hubs.html" class="nav-item nav-link">Washing Points</a>
-                            
-                                    <a href="contact.html" class="nav-item nav-link">Contact</a>
-                                    <a href="#" class="nav-item nav-link">admin</a>
-                                </div>
-                                <div class="ml-auto">
-                                    <a class="btn btn-custom" href="washing-plans.html">Get Appointment</a>
-                                </div>
-                            </div>
-                        </nav>
-                    </div>
-                </div>
-                <!-- Nav Bar End -->
-
-                 <!-- Carousel Start -->
+    <?php include_once('includes/header.php');?>
+        <!-- Carousel Start -->
         <div class="carousel">
             <div class="container-fluid">
                 <div class="owl-carousel">
@@ -161,6 +184,13 @@
         
         
         <!-- Price Start -->
+        <?php $sql = "SELECT * from packages";
+            $query = $dbh -> prepare($sql);
+            $query->execute();
+            $packages=$query->fetchAll(PDO::FETCH_OBJ);
+           ?>  
+                    
+                
         <div class="price">
             <div class="container">
                 <div class="section-header text-center">
@@ -171,8 +201,8 @@
                     <div class="col-md-4">
                         <div class="price-item">
                             <div class="price-header">
-                                <h3>Basic Cleaning</h3>
-                                <h2><span>$</span><strong>10</strong><span>.99</span></h2>
+                                <h3><?php echo htmlentities($packages[0]->name);?></h3>
+                                <h2><span>৳</span><strong><?php echo htmlentities($packages[0]->price);?></strong></h2>
                             </div>
                             <div class="price-body">
                                 <ul>
@@ -191,8 +221,8 @@
                     <div class="col-md-4">
                         <div class="price-item featured-item">
                             <div class="price-header">
-                                <h3>Premium Cleaning</h3>
-                                <h2><span>$</span><strong>20</strong><span>.99</span></h2>
+                                <h3><?php echo htmlentities($packages[1]->name);?></h3>
+                                <h2><span>৳</span><strong><?php echo htmlentities($packages[1]->price);?></strong></h2>
                             </div>
                             <div class="price-body">
                                 <ul>
@@ -211,8 +241,8 @@
                     <div class="col-md-4">
                         <div class="price-item">
                             <div class="price-header">
-                                <h3>Complex Cleaning</h3>
-                                <h2><span>$</span><strong>30</strong><span>.99</span></h2>
+                                <h3><?php echo htmlentities($packages[2]->name);?></h3>
+                                <h2><span>৳</span><strong><?php echo htmlentities($packages[2]->price);?></strong></h2>
                             </div>
                             <div class="price-body">
                                 <ul>
@@ -236,57 +266,81 @@
         
 
 
-        <!-- Footer Start -->
-        <div class="footer">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-6 col-md-6">
-                        <div class="footer-contact">
-                            <h2>Get In Touch</h2>
+        <?php include_once('includes/footer.php');?>
 
-                            <p><i class="fa fa-map-marker-alt"></i>details</p>
-                            <p><i class="fa fa-phone-alt"></i>+19849646849</p>
-                            <p><i class="fa fa-envelope"></i>Email</p>
+        <!--Modal-->
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Car Wash Booking</h4>
+        </div>
+        <div class="modal-body">
+            <form method="post">   
+           
+                        
+                            <p><input type="text" name="fname" class="form-control" required placeholder="Full Name"></p>
+                            <p><input type="text" name="contactno" class="form-control" pattern="[0-9]{10}" title="10 numeric characters only" required placeholder="Mobile No."></p>
+                            <!-- <p>Wash Date <br /><input type="date" name="washdate" required class="form-control" onchange="alert(1);"></p> -->
 
-                            <div class="footer-social">
-                                <a class="btn" href=""><i class="fab fa-twitter"></i></a>
-                                <a class="btn" href=""><i class="fab fa-facebook-f"></i></a>
-                                <a class="btn" href=""><i class="fab fa-youtube"></i></a>
-                                <a class="btn" href=""><i class="fab fa-instagram"></i></a>
-                                <a class="btn" href=""><i class="fab fa-linkedin-in"></i></a>
-                            </div>
+                            <p>
+                                <select name="packagetype" required class="form-control">
+                                    <option value="">Package Type</option>
+                                    <?php $sql = "SELECT * from packages";
+                                        $query = $dbh -> prepare($sql);
+                                        $query->execute();
+                                        $packageTypes=$query->fetchAll(PDO::FETCH_OBJ);
+                                        foreach($packageTypes as $type)
+                                            {               ?>  
+
+                                                <option value="<?php echo htmlentities($type->id);?>"><?php echo htmlentities($type->name);?> (৳<?php echo htmlentities($type->price);?>)</option>
+                                    <?php } ?>
+                                </select>
+
+                            </p>
+                            <p>
+                            <select name="washingpoint" required class="form-control">
+                            <option value="">Select Washing Point</option>
+                            <?php $sql = "SELECT * from tblwashingpoints";
+                                $query = $dbh -> prepare($sql);
+                                $query->execute();
+                                $results=$query->fetchAll(PDO::FETCH_OBJ);
+                                foreach($results as $result)
+                                    {               ?>  
+                                        <option value="<?php echo htmlentities($result->id);?>"><?php echo htmlentities($result->washingPointName);?> (<?php echo htmlentities($result->washingPointAddress);?>)</option>
+                            <?php } ?>
+                            </select></p>
+                            <p>
+                            <select name="slot" required class="form-control">
+                            <option value="">Select date & time from available slots</option>
+                            <?php $sql = "SELECT * from slots where availability =1";
+                                $query = $dbh -> prepare($sql);
+                                $query->execute();
+                                $slots=$query->fetchAll(PDO::FETCH_OBJ);
+                                if ($slots){
+                                    foreach($slots as $slot)
+                                    {               ?> 
+                                      <option value="<?php echo htmlentities($slot->id);?>"><?php echo htmlentities($slot->slotDate);?> at <?php echo htmlentities($slot->slotTime);?></option>
+                                <?php }} ?>
+                                </select>
+                            </p>
+                               
+
+                            <!-- <p>Wash Time <br /><input type="time" name="washtime" required class="form-control"></p> -->
+                            <p><textarea name="message"  class="form-control" placeholder="Message if any"></textarea></p>
+                            <p><input type="submit" class="btn btn-custom" name="book" value="Book Now"></p>
+                    </form>
+                        </div>
+                        <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                         </div>
                     </div>
-                    <div class="col-lg-5 col-md-6">
-                        <div class="footer-link">
-                            <h2>Popular Links</h2>
-                              <a href="index.html">Home</a>
-                            <a href="about.html">About Us</a>
-                            <a href="washing-plans.html">Washing Plans</a>
-                            <a href="washing-hubs.html">Washing Points</a>
-                            <a href="contact.html">Contact Us</a>
-                          
-                            
-              
-                        </div>
+                    
                     </div>
-             
                 </div>
-            </div>
-            <div class="container copyright">
-                <p>2022 BanglaWash. All rights reserved.</p>
-            </div>
-        </div>
-        <!-- Footer End -->        <!-- Back to top button -->
-        <a href="#" class="back-to-top"><i class="fa fa-chevron-up"></i></a>
-        
-        <!-- Pre Loader -->
-        <div id="loader" class="show">
-            <div class="loader"></div>
-        </div>
-
-
-<!--Modal-->
+                
  
 
 

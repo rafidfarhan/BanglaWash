@@ -1,4 +1,33 @@
+<?php error_reporting(0);
+include('includes/config.php');
 
+if(isset($_POST['submit']))
+{
+$name=$_POST['name'];
+$email=$_POST['email'];   
+$subject=$_POST['subject'];
+$message=$_POST['message'];
+
+$sql="INSERT INTO tblenquiry(FullName,EmailId,Subject,Description) VALUES(:name,:email,:subject,:message)";
+$query = $dbh->prepare($sql);
+$query->bindParam(':name',$name,PDO::PARAM_STR);
+$query->bindParam(':email',$email,PDO::PARAM_STR);
+$query->bindParam(':subject',$subject,PDO::PARAM_STR);
+$query->bindParam(':message',$message,PDO::PARAM_STR);
+$query->execute();
+$lastInsertId = $dbh->lastInsertId();
+if($lastInsertId)
+{
+ echo "<script>alert('Query sent successfully');</script>";
+ echo "<script>window.location.href ='contact.php'</script>";
+}
+else 
+{
+ echo "<script>alert('Something went wrong. Please try again.');</script>";
+}
+
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -33,8 +62,8 @@
                         <h2>Contact Us</h2>
                     </div>
                     <div class="col-12">
-                        <a href="index.html">Home</a>
-                        <a href="contact.html">Contact</a>
+                        <a href="index.php">Home</a>
+                        <a href="contact.php">Contact</a>
                     </div>
                 </div>
             </div>
@@ -50,8 +79,14 @@
                     <h2>Contact for any query</h2>
                 </div>
                 <div class="row">
-
-
+                <?php 
+                $sql = "SELECT * from tblpages where type='contact'";
+                $query = $dbh -> prepare($sql);
+                $query->execute();
+                $results=$query->fetchAll(PDO::FETCH_OBJ);
+                foreach($results as $result)
+                {       
+                ?>
 
                     <div class="col-md-4">
                         <div class="contact-info">
@@ -63,7 +98,7 @@
                                 </div>
                                 <div class="contact-info-text">
                                     <h3>Address</h3>
-                                    <p>Gulshan, Dhaka 1212</p>
+                                    <p><?php   echo $result->detail; ?></p>
                                 </div>
                             </div>
 
@@ -74,7 +109,7 @@
                                 </div>
                                 <div class="contact-info-text">
                                     <h3>Opening Hour</h3>
-                                    <p>9am to 10pm</p>
+                                    <p><?php   echo $result->openignHrs; ?></p>
                                 </div>
                             </div>
                             <div class="contact-info-item">
@@ -83,7 +118,7 @@
                                 </div>
                                 <div class="contact-info-text">
                                     <h3>Call Us</h3>
-                                    <p>+00328348912</p>
+                                    <p>+<?php   echo $result->phoneNumber; ?></p>
                                 </div>
                             </div>
                             <div class="contact-info-item">
@@ -92,11 +127,12 @@
                                 </div>
                                 <div class="contact-info-text">
                                     <h3>Email Us</h3>
-                                    <p>email@gmail.com</p>
+                                    <p><?php   echo $result->emailId; ?></p>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    <?php } ?>
                     <div class="col-md-7">
                         <div class="contact-form">
                             <div id="success"></div>
@@ -130,50 +166,7 @@
         <!-- Contact End -->
 
 
-        <!-- Footer Start -->
-        <div class="footer">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-6 col-md-6">
-                        <div class="footer-contact">
-                            <h2>Get In Touch</h2>
-
-                            <p><i class="fa fa-map-marker-alt"></i>details</p>
-                            <p><i class="fa fa-phone-alt"></i>+19849646849</p>
-                            <p><i class="fa fa-envelope"></i>Email</p>
-
-                            <div class="footer-social">
-                                <a class="btn" href=""><i class="fab fa-twitter"></i></a>
-                                <a class="btn" href=""><i class="fab fa-facebook-f"></i></a>
-                                <a class="btn" href=""><i class="fab fa-youtube"></i></a>
-                                <a class="btn" href=""><i class="fab fa-instagram"></i></a>
-                                <a class="btn" href=""><i class="fab fa-linkedin-in"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-5 col-md-6">
-                        <div class="footer-link">
-                            <h2>Popular Links</h2>
-                              <a href="index.html">Home</a>
-                            <a href="about.html">About Us</a>
-                            <a href="washing-plans.html">Washing Plans</a>
-                            <a href="washing-hubs.html">Washing Points</a>
-                            <a href="contact.html">Contact Us</a>
-                          
-                            
-              
-                        </div>
-                    </div>
-             
-                </div>
-            </div>
-            <div class="container copyright">
-                <p>2022 BanglaWash. All rights reserved.</p>
-            </div>
-        </div>
-        <!-- Footer End -->        <!-- Back to top button -->
-        <a href="#" class="back-to-top"><i class="fa fa-chevron-up"></i></a>
-        
+        <?php include_once('includes/footer.php');?>
 
         <!-- JavaScript Libraries -->
         <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
