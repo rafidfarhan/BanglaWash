@@ -16,7 +16,7 @@
                                     <a href="washing-hubs.php" class="nav-item nav-link">Washing Points</a>
                             
                                     <a href="contact.php" class="nav-item nav-link">Contact</a>
-                                    <a href="#" class="nav-item nav-link">admin</a>
+                                    <a href="admin" class="nav-item nav-link">admin</a>
                                 </div>
                                 <div class="ml-auto">
                                     <a class="btn btn-custom" href="washing-plans.php">Get Appointment</a>
